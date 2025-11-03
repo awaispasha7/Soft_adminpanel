@@ -58,7 +58,7 @@ export default function Home() {
       if (isAutoRefresh) {
         setIsAutoRefreshing(true);
       } else {
-        setLoadingStats(true);
+      setLoadingStats(true);
       }
       
       // Add cache-busting parameter to ensure fresh data on reload
@@ -118,7 +118,7 @@ export default function Home() {
         setLastUpdated(new Date());
       } else {
         if (!isAutoRefresh) {
-          console.error('Failed to load consultation stats:', data);
+        console.error('Failed to load consultation stats:', data);
         }
       }
     } catch (error) {
@@ -145,6 +145,8 @@ export default function Home() {
   useEffect(() => {
     // Set client-side flag to prevent hydration mismatch
     setIsClient(true);
+    
+    let authCheckComplete = false;
     
     // Check authentication on mount
     const checkAuth = async () => {
@@ -181,11 +183,16 @@ export default function Home() {
         } else {
           setIsLoggedIn(false);
         }
+        authCheckComplete = true;
       } catch (error) {
         console.error('Auth check error:', error);
         setIsLoggedIn(false);
+        authCheckComplete = true;
       } finally {
-        setIsCheckingAuth(false);
+        // Only set isCheckingAuth to false after auth check is complete
+        if (authCheckComplete) {
+          setIsCheckingAuth(false);
+        }
       }
     };
     
@@ -194,6 +201,11 @@ export default function Home() {
     // Listen to auth state changes
     const subscription = auth.onAuthStateChange(async (event, session) => {
       console.log('[Auth State Change]', { event, hasUser: !!session?.user, userEmail: session?.user?.email });
+      
+      // Don't process auth state changes during initial check to prevent race conditions
+      if (!authCheckComplete && event !== 'SIGNED_OUT') {
+        return;
+      }
       
       if (session?.user) {
         const user = session.user;
@@ -209,6 +221,7 @@ export default function Home() {
             
             if (isAdminUser) {
               setIsLoggedIn(true);
+              setIsCheckingAuth(false); // Ensure loading is off when logged in
               setLoggedInUser({
                 name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin',
                 email: user.email || ''
@@ -216,7 +229,7 @@ export default function Home() {
               
               // Only load stats on initial sign in, not on every token refresh
               if (event === 'SIGNED_IN') {
-                loadStats();
+    loadStats();
               }
             } else {
               console.warn('[Auth State Change] Non-admin user detected:', user.email);
@@ -225,6 +238,7 @@ export default function Home() {
               if (event === 'SIGNED_IN') {
                 await auth.signOut();
                 setIsLoggedIn(false);
+                setIsCheckingAuth(false);
                 setLoggedInUser({ name: '', email: '' });
               } else {
                 // If already logged in and token refreshed but admin check fails,
@@ -241,9 +255,9 @@ export default function Home() {
         // User signed out
         console.log('[Auth State Change] User signed out or no session');
         setIsLoggedIn(false);
+        setIsCheckingAuth(false);
         setLoggedInUser({ name: '', email: '' });
       }
-      setIsCheckingAuth(false);
     });
     
     return () => {
@@ -421,12 +435,31 @@ export default function Home() {
   };
 
   // Show loading screen while checking authentication
+  // Make it look like the dashboard to prevent flash
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: '#29473d'}}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading...</p>
+      <div className="min-h-screen" style={{backgroundColor: '#29473d'}}>
+        {/* Top Bar */}
+        <div style={{backgroundColor: '#1f3a32', borderColor: '#29473d'}} className="border-b shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 md:h-18 lg:h-20 w-full">
+              <div className="flex items-center space-x-3">
+                <img 
+                  src="/logo8.png" 
+                  alt="Admin Panel Logo" 
+                  className="w-[200px] h-[200px] object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Loading Content */}
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -567,16 +600,16 @@ export default function Home() {
               {isLoggedIn && (
                 <div className="relative profile-dropdown-container">
                   <div className="flex items-center space-x-3">
-                    <div className="text-right">
+              <div className="text-right">
                       <p className="text-white text-sm font-medium">Welcome {loggedInUser.name || 'Admin'}</p>
-                    </div>
+              </div>
                     <button
                       onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                       className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors"
                     >
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
                     </button>
                   </div>
                   
@@ -596,7 +629,7 @@ export default function Home() {
                       </div>
                     </div>
                   )}
-                </div>
+              </div>
               )}
             </div>
           </div>

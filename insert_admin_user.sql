@@ -32,3 +32,4 @@ SET
 -- Note: This will insert the user or update if email already exists
 
 
+

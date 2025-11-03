@@ -45,7 +45,7 @@ export default function ConsultationManager({ onStatusUpdate }: ConsultationMana
       if (isAutoRefresh) {
         setIsAutoRefreshing(true);
       } else {
-        setLoading(true);
+      setLoading(true);
       }
       
       // Add timeout for Railway deployments
@@ -76,15 +76,15 @@ export default function ConsultationManager({ onStatusUpdate }: ConsultationMana
         setError('');
       } else {
         if (!isAutoRefresh) {
-          setError('Failed to load consultations');
+        setError('Failed to load consultations');
         }
       }
     } catch (err) {
       // Only show error for initial load, not auto-refresh
       if (!isAutoRefresh) {
-        setError('Error loading consultations');
+      setError('Error loading consultations');
         if (err instanceof Error && err.name !== 'AbortError') {
-          console.error('Error loading consultations:', err);
+      console.error('Error loading consultations:', err);
         }
       }
     } finally {

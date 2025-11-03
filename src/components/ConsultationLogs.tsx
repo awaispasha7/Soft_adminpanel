@@ -27,7 +27,7 @@ export default function ConsultationLogs() {
       if (isAutoRefresh) {
         setIsAutoRefreshing(true);
       } else {
-        setLoading(true);
+      setLoading(true);
       }
       setError('');
       
@@ -73,15 +73,15 @@ export default function ConsultationLogs() {
         setError('');
       } else {
         if (!isAutoRefresh) {
-          setError('Failed to load consultation logs');
+        setError('Failed to load consultation logs');
         }
       }
     } catch (err) {
       // Only show error for initial load, not auto-refresh
       if (!isAutoRefresh) {
         if (err instanceof Error && err.name !== 'AbortError') {
-          setError('Error loading consultation logs');
-          console.error('Error loading logs:', err);
+      setError('Error loading consultation logs');
+      console.error('Error loading logs:', err);
         }
       }
     } finally {

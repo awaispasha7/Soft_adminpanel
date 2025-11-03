@@ -165,3 +165,4 @@ railway open
 
 **Note**: Your application is configured to use standalone output, which creates an optimized production build perfect for Railway deployment.
 
+

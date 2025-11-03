@@ -41,3 +41,4 @@ CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON public.admin_activity
 -- These tables are optional for additional features.
 
 
+
